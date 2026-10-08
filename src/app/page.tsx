@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const directions = [
   { name: "Calm", description: "A slower, softer way to wander.", route: "/mood-boards/calm", art: "calm", number: "01" },
   { name: "Arcade", description: "Playful color for the curious traveler.", route: "/mood-boards/arcade", art: "arcade", number: "02" },
@@ -21,7 +23,8 @@ function DestinationCard({
   number: string;
   category: "Visual direction" | "Design language";
 }) {
-  return (
+  const isAvailable = category === "Visual direction";
+  const card = (
     <article className="destination-card">
       <div className={`card-art card-art--${art}`} aria-hidden="true">
         {category === "Visual direction" ? (
@@ -48,16 +51,26 @@ function DestinationCard({
             <p className="card-kicker">{category}</p>
             <h3>{name}</h3>
           </div>
-          <span className="status-pill">Planned</span>
+          <span className="status-pill">{isAvailable ? "View board" : "Planned"}</span>
         </div>
         <p className="card-description">{description}</p>
         <div className="route-meta">
           <span className="route-code">{route}</span>
-          <span className="availability">Page not available yet</span>
+          <span className="availability">{isAvailable ? "Open mood board ↗" : "Page not available yet"}</span>
         </div>
       </div>
     </article>
   );
+
+  if (isAvailable) {
+    return (
+      <Link className="destination-card-link" href={route}>
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }
 
 function ProjectSection({
@@ -133,7 +146,7 @@ export default function Home() {
           <div className="hero-art__stamp"><span>DESIGN<br />JOURNAL</span><span>01—04</span></div>
           <span className="hero-art__caption">A study in the art of getting away</span>
         </div>
-        <div className="hero__index"><span><strong>01</strong> live page</span><i /><span><strong>07</strong> planned destinations</span></div>
+        <div className="hero__index"><span><strong>04</strong> live pages</span><i /><span><strong>04</strong> destinations remaining</span></div>
       </section>
 
       <div className="project-intro" id="project-map">
@@ -185,7 +198,7 @@ export default function Home() {
 
       <footer className="footer">
         <span>Travel Planner <i>·</i> MPCS 51238</span>
-        <span>Iteration 01 of 04 <i>·</i> Project hub</span>
+        <span>Iteration 02C of 04 <i>·</i> Project hub</span>
       </footer>
     </main>
   );
