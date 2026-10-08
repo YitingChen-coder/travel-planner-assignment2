@@ -23,7 +23,6 @@ function DestinationCard({
   number: string;
   category: "Visual direction" | "Design language";
 }) {
-  const isAvailable = category === "Visual direction";
   const card = (
     <article className="destination-card">
       <div className={`card-art card-art--${art}`} aria-hidden="true">
@@ -51,26 +50,22 @@ function DestinationCard({
             <p className="card-kicker">{category}</p>
             <h3>{name}</h3>
           </div>
-          <span className="status-pill">{isAvailable ? "View board" : "Planned"}</span>
+          <span className="status-pill">{category === "Visual direction" ? "View board" : "View system"}</span>
         </div>
         <p className="card-description">{description}</p>
         <div className="route-meta">
           <span className="route-code">{route}</span>
-          <span className="availability">{isAvailable ? "Open mood board ↗" : "Page not available yet"}</span>
+          <span className="availability">{category === "Visual direction" ? "Open mood board ↗" : "Open design system ↗"}</span>
         </div>
       </div>
     </article>
   );
 
-  if (isAvailable) {
-    return (
-      <Link className="destination-card-link" href={route}>
-        {card}
-      </Link>
-    );
-  }
-
-  return card;
+  return (
+    <Link className="destination-card-link" href={route}>
+      {card}
+    </Link>
+  );
 }
 
 function ProjectSection({
@@ -146,7 +141,7 @@ export default function Home() {
           <div className="hero-art__stamp"><span>DESIGN<br />JOURNAL</span><span>01—04</span></div>
           <span className="hero-art__caption">A study in the art of getting away</span>
         </div>
-        <div className="hero__index"><span><strong>04</strong> live pages</span><i /><span><strong>04</strong> destinations remaining</span></div>
+        <div className="hero__index"><span><strong>07</strong> live pages</span><i /><span><strong>01</strong> destination remaining</span></div>
       </section>
 
       <div className="project-intro" id="project-map">
@@ -198,7 +193,7 @@ export default function Home() {
 
       <footer className="footer">
         <span>Travel Planner <i>·</i> MPCS 51238</span>
-        <span>Iteration 02C of 04 <i>·</i> Project hub</span>
+        <span>Iteration 03 of 04 <i>·</i> Project hub</span>
       </footer>
     </main>
   );
