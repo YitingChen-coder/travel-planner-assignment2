@@ -27,7 +27,7 @@
 .coverImage .photoLead { width: 100%; }
 .photographFrame { height: 100%; }
 .coverImage .photographImage { object-position: center 58%; }
-.coverImage .photoIndex, .coverImage figcaption { display: none; }
+.coverImage .photoIndex, .coverImage .photograph figcaption { display: none; }
 .cover::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(0 0 0 / 65%), rgb(0 0 0 / 10%) 38%, rgb(0 0 0 / 75%) 100%); }
 .coverCopy { padding: 26px var(--gutter) 24px; display: flex; flex-direction: column; min-height: inherit; }
 .coverTopline { display: flex; align-items: center; justify-content: space-between; gap: 20px; font-size: 11px; letter-spacing: .08em; }

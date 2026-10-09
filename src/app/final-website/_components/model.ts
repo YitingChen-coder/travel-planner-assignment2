@@ -1,0 +1,241 @@
+export const destinationIds = [
+  "dolomites",
+  "liguria",
+  "paris",
+  "venice",
+] as const;
+export const categories = [
+  "Outdoors",
+  "Culture",
+  "Food",
+  "Transport",
+  "Other",
+] as const;
+export const paces = ["Unhurried", "Balanced", "Full days"] as const;
+export type Category = (typeof categories)[number];
+export type Pace = (typeof paces)[number];
+export type Activity = {
+  id: string;
+  title: string;
+  time: string;
+  category: Category;
+  duration: number;
+  cost: number;
+  notes: string;
+};
+export type ChecklistItem = {
+  id: string;
+  label: string;
+  done: boolean;
+  custom: boolean;
+};
+export type Trip = {
+  id: string;
+  destinationId: string;
+  name: string;
+  start: string;
+  end: string;
+  pace: Pace;
+  budget: number;
+  demo: boolean;
+  days: { date: string; activities: Activity[] }[];
+  checklist: ChecklistItem[];
+};
+export type TripSession = { trips: Trip[]; activeId: string | null };
+export type TripDraft = {
+  destinationId: string;
+  name: string;
+  start: string;
+  end: string;
+  pace: string;
+  budget: string;
+};
+export type ActivityDraft = {
+  title: string;
+  time: string;
+  category: string;
+  duration: string;
+  cost: string;
+  notes: string;
+};
+const DAY = 86400000;
+function dateStamp(value: string) {
+  const n = Date.parse(value + "T00:00:00Z");
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    Number.isFinite(n) &&
+    new Date(n).toISOString().slice(0, 10) === value
+    ? n
+    : NaN;
+}
+export function dayCount(start: string, end: string) {
+  return Math.round((dateStamp(end) - dateStamp(start)) / DAY) + 1;
+}
+export function validateTrip(d: TripDraft) {
+  const errors: Partial<Record<keyof TripDraft, string>> = {};
+  if (!destinationIds.some((id) => id === d.destinationId))
+    errors.destinationId = "Choose a destination.";
+  if (!d.name.trim() || d.name.trim().length > 80)
+    errors.name = "Give your trip a name of 1–80 characters.";
+  if (!Number.isFinite(dateStamp(d.start)))
+    errors.start = "Choose a valid start date.";
+  if (!Number.isFinite(dateStamp(d.end)))
+    errors.end = "Choose a valid end date.";
+  if (
+    !errors.start &&
+    !errors.end &&
+    (dayCount(d.start, d.end) < 1 || dayCount(d.start, d.end) > 30)
+  )
+    errors.end = "End date must be on or after the start, within 30 days.";
+  if (
+    !Number.isFinite(Number(d.budget)) ||
+    Number(d.budget) <= 0 ||
+    Number(d.budget) > 1000000
+  )
+    errors.budget = "Enter a budget greater than $0 and up to $1,000,000.";
+  if (!paces.some((p) => p === d.pace)) errors.pace = "Choose a travel pace.";
+  return errors;
+}
+export function validateActivity(d: ActivityDraft) {
+  const errors: Partial<Record<keyof ActivityDraft, string>> = {};
+  if (!d.title.trim() || d.title.trim().length > 100)
+    errors.title = "Enter an activity name of 1–100 characters.";
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time))
+    errors.time = "Choose a valid time.";
+  if (!categories.some((c) => c === d.category))
+    errors.category = "Choose a category.";
+  if (
+    !Number.isInteger(Number(d.duration)) ||
+    Number(d.duration) < 1 ||
+    Number(d.duration) > 1440
+  )
+    errors.duration = "Enter a duration between 1 and 1,440 minutes.";
+  if (
+    !d.cost.trim() ||
+    !Number.isFinite(Number(d.cost)) ||
+    Number(d.cost) < 0 ||
+    Number(d.cost) > 1000000
+  )
+    errors.cost = "Enter an estimate from $0 to $1,000,000.";
+  if (d.notes.length > 1000)
+    errors.notes = "Keep notes within 1,000 characters.";
+  return errors;
+}
+export function createTrip(d: TripDraft, id: string): Trip {
+  if (Object.keys(validateTrip(d)).length) throw new Error("Invalid trip");
+  return {
+    id,
+    destinationId: d.destinationId,
+    name: d.name.trim(),
+    start: d.start,
+    end: d.end,
+    pace: d.pace as Pace,
+    budget: Number(d.budget),
+    demo: false,
+    days: Array.from({ length: dayCount(d.start, d.end) }, (_, i) => ({
+      date: new Date(dateStamp(d.start) + i * DAY).toISOString().slice(0, 10),
+      activities: [],
+    })),
+    checklist: [
+      "Passport and travel documents",
+      "Transportation tickets",
+      "Accommodation confirmation",
+      "Comfortable walking shoes",
+      "Weather-appropriate clothing",
+      "Chargers and adapters",
+    ].map((label, i) => ({
+      id: `${id}-check-${i}`,
+      label,
+      done: false,
+      custom: false,
+    })),
+  };
+}
+export function upsertActivity(
+  trip: Trip,
+  day: number,
+  activity: Activity,
+): Trip {
+  return {
+    ...trip,
+    days: trip.days.map((d, i) =>
+      i !== day
+        ? d
+        : {
+            ...d,
+            activities: d.activities.some((a) => a.id === activity.id)
+              ? d.activities.map((a) => (a.id === activity.id ? activity : a))
+              : [...d.activities, activity],
+          },
+    ),
+  };
+}
+export function removeActivity(trip: Trip, day: number, id: string): Trip {
+  return {
+    ...trip,
+    days: trip.days.map((d, i) =>
+      i !== day
+        ? d
+        : { ...d, activities: d.activities.filter((a) => a.id !== id) },
+    ),
+  };
+}
+export function moveActivity(
+  trip: Trip,
+  day: number,
+  id: string,
+  offset: number,
+): Trip {
+  const activities = trip.days[day]?.activities;
+  const index = activities?.findIndex((a) => a.id === id) ?? -1;
+  const target = index + offset;
+  if (!activities || index < 0 || target < 0 || target >= activities.length)
+    return trip;
+  const copy = [...activities];
+  [copy[index], copy[target]] = [copy[target], copy[index]];
+  return {
+    ...trip,
+    days: trip.days.map((d, i) => (i !== day ? d : { ...d, activities: copy })),
+  };
+}
+export function budgetSummary(trip: Trip) {
+  const totals: Record<Category, number> = {
+    Outdoors: 0,
+    Culture: 0,
+    Food: 0,
+    Transport: 0,
+    Other: 0,
+  };
+  for (const day of trip.days)
+    for (const a of day.activities)
+      totals[a.category] += Math.round(a.cost * 100);
+  const cents = Object.values(totals).reduce((a, b) => a + b, 0);
+  const spent = cents / 100;
+  return {
+    spent,
+    remaining: Math.round((trip.budget - spent) * 100) / 100,
+    percent: (spent / trip.budget) * 100,
+    categories: Object.fromEntries(
+      Object.entries(totals).map(([k, v]) => [k, v / 100]),
+    ) as Record<Category, number>,
+  };
+}
+export function checklistSummary(trip: Trip) {
+  return {
+    done: trip.checklist.filter((i) => i.done).length,
+    total: trip.checklist.length,
+  };
+}
+export function money(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+export function dateLabel(value: string, short = false) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: short ? "short" : "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value + "T00:00:00Z"));
+}

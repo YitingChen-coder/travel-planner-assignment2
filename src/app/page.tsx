@@ -141,7 +141,7 @@ export default function Home() {
           <div className="hero-art__stamp"><span>DESIGN<br />JOURNAL</span><span>01—04</span></div>
           <span className="hero-art__caption">A study in the art of getting away</span>
         </div>
-        <div className="hero__index"><span><strong>07</strong> live pages</span><i /><span><strong>01</strong> destination remaining</span></div>
+        <div className="hero__index"><span><strong>08</strong> live pages</span><i /><span><strong>04</strong> milestones explored</span></div>
       </section>
 
       <div className="project-intro" id="project-map">
@@ -172,7 +172,7 @@ export default function Home() {
       </ProjectSection>
 
       <ProjectSection number="03" title="Final Website" description="The destination where the pieces come together." count="01 experience" id="final-website">
-        <article className="final-card">
+        <Link href="/final-website" className="destination-card-link"><article className="final-card">
           <div className="final-card__art" aria-hidden="true">
             <span className="final-sun" />
             <span className="final-route final-route--one" />
@@ -183,17 +183,17 @@ export default function Home() {
           </div>
           <div className="final-card__content">
             <p className="card-kicker">The complete experience</p>
-            <h3>Travel Planner</h3>
-            <p>A responsive trip-planning experience, shaped by the visual direction that earns its way here.</p>
-            <div className="route-meta"><span className="route-code">/travel-planner</span><span className="availability">Page not available yet</span></div>
+            <h3>The Quiet Way</h3>
+            <p>Make room for the journey. A complete, interactive travel planner built from the Calm design system.</p>
+            <div className="route-meta"><span className="route-code">/final-website</span><span className="availability">Open travel planner ↗</span></div>
           </div>
-          <div className="final-card__status"><span className="status-pill">Planned</span><span className="final-card__arrow" aria-hidden="true">↗</span></div>
-        </article>
+          <div className="final-card__status"><span className="status-pill">View website</span><span className="final-card__arrow" aria-hidden="true">↗</span></div>
+        </article></Link>
       </ProjectSection>
 
       <footer className="footer">
         <span>Travel Planner <i>·</i> MPCS 51238</span>
-        <span>Iteration 03 of 04 <i>·</i> Project hub</span>
+        <span>Iteration 04 of 04 <i>·</i> Project hub</span>
       </footer>
     </main>
   );
