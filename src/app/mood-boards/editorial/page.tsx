@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./editorial.module.css";
+import { PaperStudy, ReliefStudy, HalftoneStudy } from "../_components/MaterialStudies";
 
 export const metadata: Metadata = {
   title: "Elsewhere — A Travel Journal",
@@ -20,18 +21,18 @@ type Photograph = {
 
 const photographs: Photograph[] = [
   { number: "01", layout: "photoLead", title: "The city keeps its own weather", place: "Paris, France · 48°51′N", image: "/mood-boards/editorial/paris-river.jpg", alt: "Lamplit bridge over the Seine at dusk in Paris" },
-  { number: "02", layout: "photoVenice", title: "A quieter crossing", place: "Venice, Italy · 45°26′N", image: "/mood-boards/editorial/venice-notes.jpg", alt: "A gondola passing below the Rialto Bridge in Venice" },
+  { number: "02", layout: "photoVenice", title: "A working crossing", place: "Venice, Italy · 45°26′N", image: "/mood-boards/editorial/venice-notes.jpg", alt: "A gondola passing below the Rialto Bridge in Venice" },
   { number: "03", layout: "photoRiviera", title: "Houses at the edge of the water", place: "Liguria, Italy · 44°06′N", image: "/mood-boards/editorial/coastal-village.jpg", alt: "Pastel houses stepping down a rocky Ligurian coast" },
   { number: "04", layout: "photoAegean", title: "White walls, blue interval", place: "Santorini, Greece · 36°23′N", image: "/mood-boards/editorial/blue-hour-coast.jpg", alt: "Whitewashed houses above the deep blue Aegean Sea" },
   { number: "05", layout: "photoField", title: "The things we carry", place: "Field notes · unfiled", image: "/mood-boards/editorial/atlas-table.jpg", alt: "A folded map, field notebook, camera, pencil, and travel bag" },
-  { number: "06", layout: "photoNorth", title: "The far country", place: "Alaska · 61°13′N", image: "/mood-boards/editorial/mountain-pass.jpg", alt: "A wide green valley framed by snow-covered mountain ranges" },
+  { number: "06", layout: "photoNorth", title: "The far country", place: "Alpine valley · landscape study", image: "/mood-boards/editorial/mountain-pass.jpg", alt: "A wide green valley framed by snow-covered mountain ranges" },
 ];
 
 const typography = [
   { number: "07", label: "Cover line / grotesk display", style: "typeCover", copy: "GO\nELSEWHERE." },
-  { number: "08", label: "Running head / condensed sans", style: "typeRunning", copy: "NOTES FROM THE EDGE OF THE MAP" },
-  { number: "09", label: "Destination essay / italic", style: "typeItalic", copy: "The afternoon took the long way home." },
-  { number: "10", label: "Pull quote / oversized serif", style: "typeQuote", copy: "“Somewhere is not a point. It is a feeling.”" },
+  { number: "08", label: "Running head / condensed system sans", style: "typeRunning", copy: "NOTES FROM THE EDGE OF THE MAP" },
+  { number: "09", label: "Destination essay / italic", style: "typeItalic", copy: "At the quay, the last ferry is already turning toward the islands." },
+  { number: "10", label: "Pull quote / oversized serif", style: "typeQuote", copy: "“The harbor is a timetable written in water.”" },
   { number: "11", label: "Colophon / technical monospace", style: "typeColophon", copy: "FIELD REPORT No. 08 — 03 / 2026" },
 ];
 
@@ -44,11 +45,11 @@ const colors = [
 ];
 
 const textures = [
-  { number: "17", name: "Uncoated stock", note: "White fiber / uncoated finish", style: "texturePaper" },
-  { number: "18", name: "Letterpress grain", note: "Ink pressed into fiber", style: "texturePress" },
-  { number: "19", name: "Atlas contour", note: "Elevation lines / 1:50,000", style: "textureMap" },
-  { number: "20", name: "Column rule", note: "Heavy rule / Swiss grid", style: "textureRule" },
-  { number: "21", name: "Halftone shade", note: "Photographic dot / 42 lpi", style: "textureTone" },
+  { number: "17", name: "Uncoated stock", note: "Irregular fiber / original vector study", style: "texturePaper" },
+  { number: "18", name: "Relief impression", note: "Displaced ink edges / shallow relief simulation", style: "texturePress" },
+  { number: "19", name: "Folded atlas", note: "Fold creases / cartographic diagram", style: "textureMap" },
+  { number: "20", name: "Typesetting grid", note: "Columns, margins, and baseline rhythm", style: "textureRule" },
+  { number: "21", name: "Halftone shade", note: "Landscape tones / variable dot sizes", style: "textureTone" },
 ];
 
 type InterfacePiece = { number: string; title: string; note: string; variant: number; layout: string };
@@ -57,10 +58,10 @@ const interfaces: InterfacePiece[] = [
   { number: "22", title: "Editorial navigation", note: "A bold masthead with an issue index.", variant: 1, layout: "interfaceNav" },
   { number: "23", title: "Destination index", note: "A place to turn before you go.", variant: 2, layout: "interfaceIndex" },
   { number: "24", title: "Article preview", note: "A lead image, deck, and byline.", variant: 3, layout: "interfaceArticle" },
-  { number: "25", title: "Itinerary excerpt", note: "Three hours, left deliberately open.", variant: 4, layout: "interfaceItinerary" },
+  { number: "25", title: "Itinerary excerpt", note: "Time, context, and a margin for observation.", variant: 4, layout: "interfaceItinerary" },
   { number: "26", title: "Travel note", note: "A thought kept in the margin.", variant: 5, layout: "interfaceNote" },
   { number: "27", title: "Location details", note: "Place, coordinates, and season.", variant: 6, layout: "interfaceLocation" },
-  { number: "28", title: "Issue contents", note: "A printed route through the issue.", variant: 7, layout: "interfaceContents" },
+  { number: "28", title: "Reading progress", note: "Chapter position, next essay, and a saved place.", variant: 7, layout: "interfaceContents" },
 ];
 
 function ArtifactNumber({ number, label }: { number: string; label: string }) {
@@ -92,7 +93,7 @@ function TypographyArtifact({ specimen }: { specimen: (typeof typography)[number
 function ColorArtifact({ color }: { color: (typeof colors)[number] }) {
   return (
     <figure className={`${styles.colorStudy} ${styles[color.style]}`}>
-      <div className={styles.colorSwatch} style={{ backgroundColor: color.hex }}><span>{color.hex}</span></div>
+      <div className={styles.colorSwatch} style={{ backgroundColor: color.hex, color: ['colorInk', 'colorGray', 'colorBrick'].includes(color.style) ? '#fff' : '#111' }}><b>{({colorInk: 'HEADLINE', colorPaper: 'Reading page', colorGray: 'Byline / 08', colorStone: 'Margin note', colorBrick: '01 / Section mark'})[color.style]}</b><span>{color.hex}</span></div>
       <figcaption><ArtifactNumber number={color.number} label="COLOR" /><strong>{color.name}</strong></figcaption>
     </figure>
   );
@@ -101,7 +102,9 @@ function ColorArtifact({ color }: { color: (typeof colors)[number] }) {
 function TextureArtifact({ texture }: { texture: (typeof textures)[number] }) {
   return (
     <figure className={`${styles.textureStudy} ${styles[texture.style]}`}>
-      <div className={styles.textureSample}><span>FIELD / 03</span></div>
+      <div className={styles.textureSample}>
+        {texture.style === 'texturePaper' ? <PaperStudy id="editorial-paper" dark /> : texture.style === 'texturePress' ? <ReliefStudy id="editorial-relief" /> : texture.style === 'textureTone' ? <HalftoneStudy /> : texture.style === 'textureMap' ? <svg viewBox="0 0 360 240" aria-hidden="true"><rect width="360" height="240" fill="#f3f1ea" /><path d="M0 190Q70 85 170 145T360 45M0 110Q120 160 180 55T360 100" fill="none" stroke="#111" strokeWidth="2" /><path d="M120 0v240M240 0v240M0 120h360" stroke="#b3ada0" strokeWidth="3" /><path d="M123 0v240M243 0v240M0 123h360" stroke="#fff" strokeWidth="2" /></svg> : <svg viewBox="0 0 360 240" aria-hidden="true"><rect width="360" height="240" fill="#fff" />{[24,130,236].map(x=><g key={x}><rect x={x} y="24" width="100" height="192" fill="#f0f0f0" />{Array.from({length:12},(_,i)=><path key={i} d={`M${x} ${35+i*15}h100`} stroke="#888" strokeWidth=".7" />)}</g>)}<path d="M24 24h312M24 216h312" stroke="#111" strokeWidth="3" /></svg>}
+        <span>FIELD / 03</span></div>
       <figcaption><ArtifactNumber number={texture.number} label="MATERIAL" /><strong>{texture.name}</strong><small>{texture.note}</small></figcaption>
     </figure>
   );
@@ -118,15 +121,15 @@ function InterfaceArtwork({ variant }: { variant: number }) {
     return <div className={styles.articleSpecimen}><div className={styles.articlePhoto} /><div><span className={styles.uiOverline}>A PLACE IN THREE ACTS</span><strong>On learning the shape of a city</strong><p>By the time the bells began, we had stopped trying to find our way.</p><small>WORDS BY M. LAURENT&nbsp; / &nbsp;8 MIN READ</small></div></div>;
   }
   if (variant === 4) {
-    return <div className={styles.itinerarySpecimen}><span className={styles.uiOverline}>A DAY, LEFT OPEN / 14 MAY</span><div><time>09:10</time><p>Coffee at the counter by the station</p></div><div><time>11:40</time><p>Take the ferry, not the fast boat</p></div><div><time>16:20</time><p>Leave the afternoon unplanned</p></div></div>;
+    return <div className={styles.itinerarySpecimen}><span className={styles.uiOverline}>A DAY, LEFT OPEN / 14 MAY</span><div><time>09:10</time><p>Coffee at the counter by the station</p></div><div><time>11:40</time><p>Take the ferry, not the fast boat</p></div><div><time>16:20</time><p>Harbor notebook · watch the boats</p></div></div>;
   }
   if (variant === 5) {
-    return <div className={styles.noteSpecimen}><span>FROM THE FIELD BOOK&nbsp; / &nbsp;MAY 14</span><p>“The best hour was the one we didn’t write down.”</p><i>— L., on the coast</i><b aria-hidden="true">✳</b></div>;
+    return <div className={styles.noteSpecimen}><span>FROM THE FIELD BOOK&nbsp; / &nbsp;MAY 14</span><p>“The ferry leaves at six. The harbor keeps moving long after.”</p><i>— Field notebook, Venice</i><b aria-hidden="true">✳</b></div>;
   }
   if (variant === 6) {
     return <div className={styles.locationSpecimen}><span className={styles.uiOverline}>LOCATION / FILE 027</span><strong>Alfama, Lisboa</strong><div className={styles.locationRule} /><span>38°43′N&nbsp; 9°08′W</span><span>Late September · 22°C</span><span>Atlantic light / narrow streets</span></div>;
   }
-  return <div className={styles.contentsSpecimen}><span className={styles.uiOverline}>IN THIS ISSUE</span><strong>Elsewhere, No. 08</strong><div><span>Correspondence</span><i>04</i></div><div><span>Three days in Lisbon</span><i>18</i></div><div><span>The ferry at blue hour</span><i>34</i></div><div><span>Notes from the north</span><i>52</i></div><small>SPRING / VOL. 02</small></div>;
+  return <div className={styles.contentsSpecimen}><span className={styles.uiOverline}>CONTINUE READING / ISSUE 08</span><strong>The ferry at blue hour</strong><p>Chapter 2 of 4 · page 34 of 96</p><div><span>Reading position</span><i>35%</i></div><progress value={34} max={96} aria-label="Reading position">35%</progress><div><span>Next essay: The Cyclades</span><i>52</i></div><small>BOOKMARK SAVED FOR THIS VISIT</small></div>;
 }
 
 function InterfaceArtifact({ item }: { item: InterfacePiece }) {
