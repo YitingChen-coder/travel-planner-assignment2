@@ -70,6 +70,36 @@ function dateStamp(value: string) {
 export function dayCount(start: string, end: string) {
   return Math.round((dateStamp(end) - dateStamp(start)) / DAY) + 1;
 }
+// Parse decimal USD text before converting to the existing dollar-valued model.
+// Exponents and fractions of a cent are deliberately not accepted.
+export function parseUsdCents(value: string): number | null {
+  const text = value.trim();
+  if (!/^(?:\d+(?:\.\d{0,2})?|\.\d{1,2})$/.test(text)) return null;
+  const [whole, fraction = ""] = text.split(".");
+  const cents = Number(whole || "0") * 100 + Number(fraction.padEnd(2, "0"));
+  return Number.isSafeInteger(cents) ? cents : null;
+}
+
+export function validateBudget(value: string): string | undefined {
+  const cents = parseUsdCents(value);
+  if (cents === null || cents < 1 || cents > 100000000)
+    return "Enter a USD budget from $0.01 to $1,000,000 with at most two decimal places (e.g. 12.30).";
+}
+
+function validateCost(value: string): string | undefined {
+  const cents = parseUsdCents(value);
+  if (cents === null || cents < 0 || cents > 100000000)
+    return "Enter a USD estimate from $0 to $1,000,000 with at most two decimal places (e.g. 12.30).";
+}
+
+function toCents(value: number) {
+  return Math.round(value * 100);
+}
+
+export function activityTotal(activities: Activity[]) {
+  return activities.reduce((sum, activity) => sum + toCents(activity.cost), 0) / 100;
+}
+
 export function validateTrip(d: TripDraft) {
   const errors: Partial<Record<keyof TripDraft, string>> = {};
   if (!destinationIds.some((id) => id === d.destinationId))
@@ -86,12 +116,8 @@ export function validateTrip(d: TripDraft) {
     (dayCount(d.start, d.end) < 1 || dayCount(d.start, d.end) > 30)
   )
     errors.end = "End date must be on or after the start, within 30 days.";
-  if (
-    !Number.isFinite(Number(d.budget)) ||
-    Number(d.budget) <= 0 ||
-    Number(d.budget) > 1000000
-  )
-    errors.budget = "Enter a budget greater than $0 and up to $1,000,000.";
+  const budgetError = validateBudget(d.budget);
+  if (budgetError) errors.budget = budgetError;
   if (!paces.some((p) => p === d.pace)) errors.pace = "Choose a travel pace.";
   return errors;
 }
@@ -109,13 +135,8 @@ export function validateActivity(d: ActivityDraft) {
     Number(d.duration) > 1440
   )
     errors.duration = "Enter a duration between 1 and 1,440 minutes.";
-  if (
-    !d.cost.trim() ||
-    !Number.isFinite(Number(d.cost)) ||
-    Number(d.cost) < 0 ||
-    Number(d.cost) > 1000000
-  )
-    errors.cost = "Enter an estimate from $0 to $1,000,000.";
+  const costError = validateCost(d.cost);
+  if (costError) errors.cost = costError;
   if (d.notes.length > 1000)
     errors.notes = "Keep notes within 1,000 characters.";
   return errors;
@@ -129,7 +150,7 @@ export function createTrip(d: TripDraft, id: string): Trip {
     start: d.start,
     end: d.end,
     pace: d.pace as Pace,
-    budget: Number(d.budget),
+    budget: parseUsdCents(d.budget)! / 100,
     demo: false,
     days: Array.from({ length: dayCount(d.start, d.end) }, (_, i) => ({
       date: new Date(dateStamp(d.start) + i * DAY).toISOString().slice(0, 10),
@@ -245,13 +266,14 @@ export function budgetSummary(trip: Trip) {
   };
   for (const day of trip.days)
     for (const a of day.activities)
-      totals[a.category] += Math.round(a.cost * 100);
+      totals[a.category] += toCents(a.cost);
   const cents = Object.values(totals).reduce((a, b) => a + b, 0);
   const spent = cents / 100;
+  const budgetCents = toCents(trip.budget);
   return {
     spent,
-    remaining: Math.round((trip.budget - spent) * 100) / 100,
-    percent: (spent / trip.budget) * 100,
+    remaining: (budgetCents - cents) / 100,
+    percent: (cents / budgetCents) * 100,
     categories: Object.fromEntries(
       Object.entries(totals).map(([k, v]) => [k, v / 100]),
     ) as Record<Category, number>,

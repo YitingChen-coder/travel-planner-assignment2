@@ -6,6 +6,8 @@ import {
   paces,
   validateTrip,
   validateActivity,
+  validateBudget,
+  parseUsdCents,
   createTrip,
   tripShorteningSummary,
   updateTripDetails,
@@ -282,7 +284,7 @@ export function ActivityForm({
             time: draft.time,
             category: draft.category as Category,
             duration: Number(draft.duration),
-            cost: Number(draft.cost),
+            cost: parseUsdCents(draft.cost)! / 100,
             notes: draft.notes.trim(),
           });
         }}
@@ -400,16 +402,13 @@ export function BudgetForm({
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          if (
-            !Number.isFinite(Number(value)) ||
-            Number(value) <= 0 ||
-            Number(value) > 1000000
-          ) {
-            setError("Enter a budget greater than $0 and up to $1,000,000.");
+          const found = validateBudget(value);
+          if (found) {
+            setError(found);
             document.getElementById("edit-budget")?.focus();
             return;
           }
-          onSave(Number(value));
+          onSave(parseUsdCents(value)! / 100);
         }}
       >
         <Field id="edit-budget" label="Overall budget (USD)" error={error}>

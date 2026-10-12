@@ -193,3 +193,54 @@ test("trip detail updates reject invalid fields and retain one-to-thirty-day lim
   }
   assert.equal(m.updateTripDetails(trip, { ...draft, end: "2026-11-30" }).days.length, 30);
 });
+
+test("USD validation rejects excessive precision and non-decimal notation consistently", () => {
+  const activity = { title: "Lunch", time: "12:00", category: "Food", duration: "60", cost: "1", notes: "" };
+  for (const value of ["0.001", "0.004", "1.005", "1.000", "1000000.001", "1e2", "0x10", "NaN", "Infinity", "", " ", "-1", "1,000", "1.2.3"]) {
+    assert.ok(m.validateTrip({ ...draft, budget: value }).budget, value);
+    assert.ok(m.validateActivity({ ...activity, cost: value }).cost, value);
+    assert.ok(m.validateBudget(value), value);
+  }
+  for (const value of ["0.01", "0.1", "1", "1.00", "1.23", ".50", "1.", " 12.30 ", "1000000", "1000000.00"]) {
+    assert.equal(m.validateTrip({ ...draft, budget: value }).budget, undefined, value);
+    assert.equal(m.validateActivity({ ...activity, cost: value }).cost, undefined, value);
+    assert.equal(m.validateBudget(value), undefined, value);
+  }
+  assert.ok(m.validateBudget("0"));
+  assert.equal(m.validateActivity({ ...activity, cost: "0.00" }).cost, undefined);
+  assert.ok(m.validateBudget("1000000.01"));
+  assert.ok(m.validateActivity({ ...activity, cost: "1000000.01" }).cost);
+  assert.match(m.validateBudget("0.001"), /two decimal places/);
+  assert.match(m.validateActivity({ ...activity, cost: "0.004" }).cost, /two decimal places/);
+});
+
+test("USD parsing converts decimal text exactly to cents", () => {
+  assert.equal(m.parseUsdCents("1.23"), 123);
+  assert.equal(m.parseUsdCents(".29"), 29);
+  assert.equal(m.parseUsdCents(" 001.2 "), 120);
+  assert.equal(m.parseUsdCents("0"), 0);
+  assert.equal(m.parseUsdCents("1000000.00"), 100000000);
+  for (const value of ["0.004", "1e2", "-0.01", "", "999999999999999999999999"]) assert.equal(m.parseUsdCents(value), null);
+});
+
+test("daily, category and trip totals share cents arithmetic without mutating valid data", () => {
+  let trip = m.createTrip({ ...draft, budget: "0.60" }, "precision");
+  const activity = { id: "a", title: "Lunch", time: "12:00", category: "Food", duration: 60, cost: 0.1, notes: "" };
+  trip = m.upsertActivity(trip, 0, activity);
+  trip = m.upsertActivity(trip, 0, { ...activity, id: "b", cost: 0.2 });
+  trip = m.upsertActivity(trip, 1, { ...activity, id: "c", category: "Transport", cost: 0.29 });
+  const before = structuredClone(trip);
+  assert.equal(m.activityTotal(trip.days[0].activities), 0.3);
+  assert.deepEqual(m.budgetSummary(trip), { spent: 0.59, remaining: 0.01, percent: 0.59 / 0.6 * 100, categories: { Outdoors: 0, Culture: 0, Food: 0.3, Transport: 0.29, Other: 0 } });
+  assert.deepEqual(trip, before);
+  trip = m.upsertActivity(trip, 1, { ...activity, id: "c", category: "Transport", cost: 0.3 });
+  assert.equal(m.budgetSummary(trip).remaining, 0);
+  assert.equal(m.budgetSummary(trip).percent, 100);
+  trip = m.upsertActivity(trip, 1, { ...activity, id: "c", category: "Transport", cost: 0.31 });
+  assert.equal(m.budgetSummary(trip).remaining, -0.01);
+  assert.equal(m.activityTotal([]), 0);
+  assert.equal(m.activityTotal(Array.from({ length: 1000 }, () => ({ ...activity, cost: 0.01 }))), 10);
+  assert.equal(m.activityTotal([{ ...activity, cost: 1000000 }, { ...activity, cost: 1000000 }]), 2000000);
+  assert.equal(before.budget, 0.6);
+  assert.deepEqual(before.days[0].activities, [activity, { ...activity, id: "b", cost: 0.2 }]);
+});

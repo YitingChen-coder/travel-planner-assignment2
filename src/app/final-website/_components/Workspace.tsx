@@ -4,6 +4,7 @@ import { useState } from "react";
 import { destinations } from "./data";
 import {
   budgetSummary,
+  activityTotal,
   checklistSummary,
   dateLabel,
   money,
@@ -166,7 +167,7 @@ export default function Workspace({
                 <h3>{dateLabel(current.date)}</h3>
                 <p>
                   {current.activities.length
-                    ? `${current.activities.length} ${current.activities.length === 1 ? "moment" : "moments"} · ${money(current.activities.reduce((sum, a) => sum + a.cost, 0))} estimated`
+                    ? `${current.activities.length} ${current.activities.length === 1 ? "moment" : "moments"} · ${money(activityTotal(current.activities))} estimated`
                     : "A day that’s still yours to shape."}
                 </p>
               </div>
