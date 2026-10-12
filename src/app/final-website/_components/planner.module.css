@@ -1104,6 +1104,12 @@
   color: var(--muted);
   margin-bottom: 24px;
 }
+.tripCard p.tripCardDates {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
 .demoNote {
   display: flex;
   justify-content: space-between;

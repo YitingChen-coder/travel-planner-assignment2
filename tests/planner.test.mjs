@@ -244,3 +244,11 @@ test("daily, category and trip totals share cents arithmetic without mutating va
   assert.equal(before.budget, 0.6);
   assert.deepEqual(before.days[0].activities, [activity, { ...activity, id: "b", cost: 0.2 }]);
 });
+
+test("trip card dates identify same-year, cross-year and single-day journeys", () => {
+  assert.equal(m.dateRangeLabel("2026-11-01", "2026-11-03"), "Nov 1 – Nov 3, 2026");
+  assert.equal(m.dateRangeLabel("2027-11-01", "2027-11-03"), "Nov 1 – Nov 3, 2027");
+  assert.equal(m.dateRangeLabel("2026-12-31", "2027-01-02"), "Dec 31, 2026 – Jan 2, 2027");
+  assert.equal(m.dateRangeLabel("2028-02-29", "2028-03-01"), "Feb 29 – Mar 1, 2028");
+  assert.equal(m.dateRangeLabel("2026-11-01", "2026-11-01"), "Nov 1, 2026");
+});

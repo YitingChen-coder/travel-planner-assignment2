@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { CSSProperties } from "react";
 import { systems } from "../../design-systems/_components/systems";
 import { destinations } from "./data";
-import { dateLabel, money } from "./model";
+import { dateRangeLabel, money } from "./model";
 import { useTrips } from "./useTrips";
 import { TripForm } from "./forms";
 import { Confirm } from "./ui";
@@ -328,10 +328,11 @@ export default function Planner() {
                     <div>
                       <p className={styles.eyebrow}>{d.region}</p>
                       <h2>{trip.name}</h2>
+                      <p className={styles.tripCardDates}>
+                        {dateRangeLabel(trip.start, trip.end)}
+                      </p>
                       <p>
-                        {dateLabel(trip.start, true)} –{" "}
-                        {dateLabel(trip.end, true)} · {trip.days.length} days ·{" "}
-                        {trip.pace}
+                        {trip.days.length} {trip.days.length === 1 ? "day" : "days"} · {trip.pace}
                       </p>
                       <button
                         className={styles.primary}

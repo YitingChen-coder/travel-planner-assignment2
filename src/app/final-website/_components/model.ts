@@ -299,3 +299,12 @@ export function dateLabel(value: string, short = false) {
     timeZone: "UTC",
   }).format(new Date(value + "T00:00:00Z"));
 }
+
+export function dateRangeLabel(start: string, end: string) {
+  const startYear = start.slice(0, 4);
+  const endYear = end.slice(0, 4);
+  if (start === end) return `${dateLabel(start, true)}, ${startYear}`;
+  if (startYear !== endYear)
+    return `${dateLabel(start, true)}, ${startYear} – ${dateLabel(end, true)}, ${endYear}`;
+  return `${dateLabel(start, true)} – ${dateLabel(end, true)}, ${endYear}`;
+}
