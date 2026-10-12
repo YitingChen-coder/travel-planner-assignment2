@@ -226,6 +226,19 @@
   align-items: center;
   border-bottom: 1px solid var(--border);
 }
+/* Quiet feedback for text actions; geometry and keyboard outlines stay intact. */
+:is(.textButton, .demoLink, .destinationCta, .textLink,
+  .breadcrumb button, .header nav button, .footer button, .footer a):not(:disabled):hover {
+  background: var(--surface);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+:is(.textButton, .demoLink, .destinationCta, .textLink,
+  .breadcrumb button, .header nav button, .footer button, .footer a):not(:disabled):active {
+  background: var(--background);
+  box-shadow: inset 0 -2px var(--accent);
+}
 .eyebrow {
   font:
     700 10px/1.5 Arial,
@@ -722,6 +735,22 @@
   color: var(--accent-fg);
   background: var(--accent);
   border-color: var(--accent);
+}
+.daySelector button:not(:disabled):hover {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.daySelector button:not(:disabled):active {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.daySelector button[aria-selected="false"]:not(:disabled):hover {
+  background: var(--background);
+  border-color: var(--accent);
+}
+.daySelector button[aria-selected="true"]:not(:disabled):hover {
+  box-shadow: inset 0 0 0 1px var(--accent-fg);
+}
+.daySelector button[aria-selected="true"]:not(:disabled):active {
+  box-shadow: inset 0 0 0 2px var(--accent-fg);
 }
 .dayHeading {
   display: flex;
