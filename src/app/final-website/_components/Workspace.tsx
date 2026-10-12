@@ -12,7 +12,7 @@ import {
   moveActivity,
 } from "./model";
 import type { Activity, Trip } from "./model";
-import { ActivityForm, BudgetForm } from "./forms";
+import { ActivityForm, BudgetForm, TripForm } from "./forms";
 import { Confirm } from "./ui";
 import styles from "./planner.module.css";
 export default function Workspace({
@@ -35,6 +35,7 @@ export default function Workspace({
     activity?: Activity;
   } | null>(null);
   const [removal, setRemoval] = useState<Activity | null>(null);
+  const [tripEdit, setTripEdit] = useState(false);
   const [budgetEdit, setBudgetEdit] = useState(false);
   const [custom, setCustom] = useState("");
   const [customError, setCustomError] = useState("");
@@ -87,6 +88,9 @@ export default function Workspace({
             <span>{trip.pace}</span>
           </div>
           <div className={styles.tripActions}>
+            <button className={styles.secondary} onClick={() => setTripEdit(true)}>
+              Edit trip details
+            </button>
             <button className={styles.secondary} onClick={onNew}>
               Create another trip
             </button>
@@ -462,6 +466,21 @@ export default function Workspace({
           </div>
         </aside>
       </div>
+      {tripEdit && (
+        <TripForm
+          destinationId={trip.destinationId}
+          trip={trip}
+          onClose={() => setTripEdit(false)}
+          onSave={(updated) => {
+            const destinationChanged = updated.destinationId !== trip.destinationId;
+            setDay(Math.min(selectedDay, updated.days.length - 1));
+            change(updated, destinationChanged
+              ? "Trip details updated. Review your activities for your new destination."
+              : "Trip details updated.");
+            setTripEdit(false);
+          }}
+        />
+      )}
       {activityEdit && (
         <ActivityForm
           activity={activityEdit.activity}

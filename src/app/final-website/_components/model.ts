@@ -150,6 +150,44 @@ export function createTrip(d: TripDraft, id: string): Trip {
     })),
   };
 }
+export type TripDetailsDraft = Omit<TripDraft, "budget">;
+
+function validateTripDetails(trip: Trip, draft: TripDetailsDraft) {
+  return validateTrip({ ...draft, budget: String(trip.budget) });
+}
+
+export function tripShorteningSummary(trip: Trip, draft: TripDetailsDraft) {
+  if (Object.keys(validateTripDetails(trip, draft)).length)
+    throw new Error("Invalid trip details");
+  const removed = trip.days.slice(dayCount(draft.start, draft.end));
+  return {
+    days: removed.length,
+    activities: removed.reduce((sum, day) => sum + day.activities.length, 0),
+  };
+}
+
+export function updateTripDetails(
+  trip: Trip,
+  draft: TripDetailsDraft,
+  confirmed = false,
+): Trip {
+  const removed = tripShorteningSummary(trip, draft);
+  if (removed.activities && !confirmed)
+    throw new Error("Shortening this trip requires confirmation");
+  return {
+    ...trip,
+    name: draft.name.trim(),
+    destinationId: draft.destinationId,
+    start: draft.start,
+    end: draft.end,
+    pace: draft.pace as Pace,
+    days: Array.from({ length: dayCount(draft.start, draft.end) }, (_, i) => ({
+      date: new Date(dateStamp(draft.start) + i * DAY).toISOString().slice(0, 10),
+      activities: trip.days[i]?.activities ?? [],
+    })),
+  };
+}
+
 export function upsertActivity(
   trip: Trip,
   day: number,

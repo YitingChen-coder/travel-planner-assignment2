@@ -7,6 +7,8 @@ import {
   validateTrip,
   validateActivity,
   createTrip,
+  tripShorteningSummary,
+  updateTripDetails,
 } from "./model";
 import type {
   Activity,
@@ -24,25 +26,33 @@ function today() {
 export function TripForm({
   destinationId,
   onClose,
+  trip,
   onCreate,
+  onSave,
 }: {
   destinationId: string;
   onClose: () => void;
-  onCreate: (trip: Trip) => void;
-}) {
+} & (
+  | { trip?: never; onCreate: (trip: Trip) => void; onSave?: never }
+  | { trip: Trip; onSave: (trip: Trip) => void; onCreate?: never }
+)) {
   const destination =
     destinations.find((d) => d.id === destinationId) || destinations[0];
   const [draft, setDraft] = useState<TripDraft>({
-    destinationId: destination.id,
-    name: `A few days in ${destination.name}`,
-    start: "",
-    end: "",
-    pace: "Unhurried",
-    budget: String(destination.daily * destination.days),
+    destinationId: trip?.destinationId ?? destination.id,
+    name: trip?.name ?? `A few days in ${destination.name}`,
+    start: trip?.start ?? "",
+    end: trip?.end ?? "",
+    pace: trip?.pace ?? "Unhurried",
+    budget: String(trip?.budget ?? destination.daily * destination.days),
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof TripDraft, string>>
   >({});
+  const [shortening, setShortening] = useState<{
+    days: number;
+    activities: number;
+  } | null>(null);
   const change = (key: keyof TripDraft, value: string) => {
     setDraft((d) => ({ ...d, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
@@ -54,112 +64,165 @@ export function TripForm({
   });
   return (
     <Modal
-      title="Make room for a new journey."
-      description="A place, a little time, and a plan of your own. All costs are illustrative estimates in USD."
+      title={
+        shortening
+          ? "Make this journey shorter?"
+          : trip
+            ? "A little adjustment to your journey."
+            : "Make room for a new journey."
+      }
+      description={
+        shortening
+          ? `${shortening.days} ${shortening.days === 1 ? "day" : "days"} and ${shortening.activities} ${shortening.activities === 1 ? "activity" : "activities"} will be removed from the end of your trip. This cannot be undone.`
+          : trip
+            ? "Update your journey. Activities stay with their relative day number; new days begin empty."
+            : "A place, a little time, and a plan of your own. All costs are illustrative estimates in USD."
+      }
       onClose={onClose}
     >
-      <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          const found = validateTrip(draft);
-          setErrors(found);
-          const first = Object.keys(found)[0];
-          if (first) {
-            document.getElementById(`trip-${first}`)?.focus();
-            return;
-          }
-          onCreate(createTrip(draft, crypto.randomUUID()));
-        }}
-      >
-        <Field
-          id="trip-destinationId"
-          label="Destination"
-          error={errors.destinationId}
-        >
-          <select
-            {...attrs("destinationId")}
-            value={draft.destinationId}
-            onChange={(e) => change("destinationId", e.target.value)}
+      {shortening && trip ? (
+        <div className={styles.modalActions}>
+          <button
+            type="button"
+            className={styles.secondary}
+            autoFocus
+            onClick={() => {
+              setShortening(null);
+              requestAnimationFrame(() => document.getElementById("trip-end")?.focus());
+            }}
           >
-            {destinations.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name} · {d.region}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field id="trip-name" label="Trip name" error={errors.name}>
-          <input
-            {...attrs("name")}
-            required
-            maxLength={80}
-            value={draft.name}
-            onChange={(e) => change("name", e.target.value)}
-          />
-        </Field>
-        <div className={styles.formGrid}>
-          <Field id="trip-start" label="Start date" error={errors.start}>
-            <input
-              {...attrs("start")}
-              type="date"
-              required
-              value={draft.start}
-              onChange={(e) => change("start", e.target.value)}
-            />
-          </Field>
-          <Field id="trip-end" label="End date" error={errors.end}>
-            <input
-              {...attrs("end")}
-              type="date"
-              required
-              value={draft.end}
-              onChange={(e) => change("end", e.target.value)}
-            />
-          </Field>
+            Keep all days
+          </button>
+          <button
+            type="button"
+            className={styles.destructive}
+            onClick={() => onSave?.(updateTripDetails(trip, draft, true))}
+          >
+            Shorten trip
+          </button>
         </div>
-        <p className={styles.hint}>
-          Choose 1–30 days. Past dates are welcome for travel journals. Today is{" "}
-          {today()}.
-        </p>
-        <div className={styles.formGrid}>
-          <Field id="trip-pace" label="Travel pace" error={errors.pace}>
+      ) : (
+        <form
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            const found = validateTrip(draft);
+            setErrors(found);
+            const first = Object.keys(found)[0];
+            if (first) {
+              document.getElementById(`trip-${first}`)?.focus();
+              return;
+            }
+            if (trip) {
+              const removed = tripShorteningSummary(trip, draft);
+              if (removed.activities) {
+                setShortening(removed);
+                return;
+              }
+              onSave?.(updateTripDetails(trip, draft));
+            } else {
+              onCreate?.(createTrip(draft, crypto.randomUUID()));
+            }
+          }}
+        >
+          <Field
+            id="trip-destinationId"
+            label="Destination"
+            error={errors.destinationId}
+          >
             <select
-              {...attrs("pace")}
-              value={draft.pace}
-              onChange={(e) => change("pace", e.target.value)}
+              {...attrs("destinationId")}
+              value={draft.destinationId}
+              onChange={(e) => change("destinationId", e.target.value)}
             >
-              {paces.map((p) => (
-                <option key={p}>{p}</option>
+              {destinations.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name} · {d.region}
+                </option>
               ))}
             </select>
           </Field>
-          <Field
-            id="trip-budget"
-            label="Overall budget (USD)"
-            error={errors.budget}
-          >
+          {trip && draft.destinationId !== trip.destinationId && (
+            <p className={styles.hint} role="status">
+              Your activities will be kept. Review them for your new destination.
+            </p>
+          )}
+          <Field id="trip-name" label="Trip name" error={errors.name}>
             <input
-              {...attrs("budget")}
-              type="number"
-              min="0.01"
-              max="1000000"
-              step="0.01"
+              {...attrs("name")}
               required
-              value={draft.budget}
-              onChange={(e) => change("budget", e.target.value)}
+              maxLength={80}
+              value={draft.name}
+              onChange={(e) => change("name", e.target.value)}
             />
           </Field>
-        </div>
-        <div className={styles.modalActions}>
-          <button type="button" className={styles.secondary} onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className={styles.primary}>
-            Create trip <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-      </form>
+          <div className={styles.formGrid}>
+            <Field id="trip-start" label="Start date" error={errors.start}>
+              <input
+                {...attrs("start")}
+                type="date"
+                required
+                value={draft.start}
+                onChange={(e) => change("start", e.target.value)}
+              />
+            </Field>
+            <Field id="trip-end" label="End date" error={errors.end}>
+              <input
+                {...attrs("end")}
+                type="date"
+                required
+                value={draft.end}
+                onChange={(e) => change("end", e.target.value)}
+              />
+            </Field>
+          </div>
+          <p className={styles.hint}>
+            Choose 1–30 days. Past dates are welcome for travel journals. Today is{" "}
+            {today()}.
+          </p>
+          <div className={styles.formGrid}>
+            <Field id="trip-pace" label="Travel pace" error={errors.pace}>
+              <select
+                {...attrs("pace")}
+                value={draft.pace}
+                onChange={(e) => change("pace", e.target.value)}
+              >
+                {paces.map((p) => (
+                  <option key={p}>{p}</option>
+                ))}
+              </select>
+            </Field>
+            {!trip && (
+              <Field
+                id="trip-budget"
+                label="Overall budget (USD)"
+                error={errors.budget}
+              >
+                <input
+                  {...attrs("budget")}
+                  type="number"
+                  min="0.01"
+                  max="1000000"
+                  step="0.01"
+                  required
+                  value={draft.budget}
+                  onChange={(e) => change("budget", e.target.value)}
+                />
+              </Field>
+            )}
+          </div>
+          <div className={styles.modalActions}>
+            <button type="button" className={styles.secondary} onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className={styles.primary}>
+              {trip ? "Save trip details" : (
+                <>Create trip <span aria-hidden="true">↗</span></>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
     </Modal>
   );
 }

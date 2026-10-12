@@ -108,3 +108,27 @@ PLAYWRIGHT_MODULE=/tmp/travel-m3-qa/node_modules/playwright-core/index.mjs node 
 ```
 
 This audit checks the requirements quoted for Assignment 2: three directions; 28 artifacts per board; design tokens, components and states; keyboard access; responsive layouts; images and links; console/network health; and axe-core. It captures screenshots outside the repository. The original assignment PDF is not present in the repository; the review uses the explicit requirements supplied by the user and the existing handover notes, without adding rubric criteria.
+
+### Editing an existing trip
+
+Open a trip and choose **Edit trip details** to update its name, destination,
+start/end dates, and travel pace. Activities keep their relative day number and
+order when dates shift; extending adds empty days. Shortening requires confirmation
+when removed days contain activities, showing the number of days and activities
+removed. **Keep all days** returns to the draft; Cancel, Escape, or closing the
+dialog leaves the trip and selected day unchanged. After saving, the selected day
+is kept within the new range. Changing destination keeps activities and displays
+a reminder to review them. Trip identity, budget, checklist, and demo status remain
+unchanged. All edits still exist only in memory.
+
+The focused browser regression uses the same isolated tooling and server setup:
+
+```bash
+PLAYWRIGHT_MODULE=/tmp/travel-m3-qa/node_modules/playwright-core/index.mjs node tests/trip-details.browser.mjs
+```
+
+It covers prefilled details, validation, cancellation, date shifts and extensions,
+destination changes, shortening confirmation, selected-day handling, and refresh
+reset at 1440, 768, 390, and 320 pixels. Run persistence-blocking browser suites
+against `npm run start` (a production build), as Next.js development tooling can
+read cookies independently of the application's trip state.

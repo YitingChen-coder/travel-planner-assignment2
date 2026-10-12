@@ -142,3 +142,54 @@ test("application source contains no persistence APIs or external data requests"
       );
   }
 });
+
+test("trip detail edits preserve identity, budget, checklist and relative-day activities", () => {
+  let trip = m.createTrip(draft, "original");
+  const activity = { id: "kept", title: "Walk", time: "09:00", category: "Outdoors", duration: 60, cost: 12, notes: "Keep me" };
+  trip = m.upsertActivity(trip, 0, activity);
+  trip = m.upsertActivity(trip, 0, { ...activity, id: "second" });
+  trip = m.upsertActivity(trip, 2, { ...activity, id: "last" });
+  trip = { ...trip, demo: true, checklist: trip.checklist.map((item, i) => i === 0 ? { ...item, done: true } : item) };
+  const original = structuredClone(trip);
+  const details = { ...draft, name: "  Paris pause  ", destinationId: "paris", pace: "Balanced", start: "2026-12-31", end: "2027-01-04", budget: "999" };
+  const next = m.updateTripDetails(trip, details);
+  assert.equal(next.name, "Paris pause");
+  assert.equal(next.destinationId, "paris");
+  assert.equal(next.pace, "Balanced");
+  assert.equal(next.start, details.start);
+  assert.equal(next.end, details.end);
+  assert.equal(next.id, trip.id);
+  assert.equal(next.budget, trip.budget);
+  assert.equal(next.demo, true);
+  assert.deepEqual(next.checklist, trip.checklist);
+  assert.deepEqual(next.days.map((d) => d.date), ["2026-12-31", "2027-01-01", "2027-01-02", "2027-01-03", "2027-01-04"]);
+  assert.deepEqual(next.days.slice(0, 3).map((d) => d.activities), trip.days.map((d) => d.activities));
+  assert.deepEqual(next.days.slice(3).map((d) => d.activities), [[], []]);
+  assert.deepEqual(trip, original);
+});
+
+test("shortening counts all removed days and activities and requires explicit confirmation", () => {
+  let trip = m.createTrip(draft, "original");
+  const a = { id: "tail", title: "Lunch", time: "12:00", category: "Food", duration: 60, cost: 20, notes: "" };
+  trip = m.upsertActivity(trip, 2, a);
+  const details = { ...draft, end: draft.start };
+  const original = structuredClone(trip);
+  assert.deepEqual(m.tripShorteningSummary(trip, details), { days: 2, activities: 1 });
+  assert.throws(() => m.updateTripDetails(trip, details), /confirmation/i);
+  assert.deepEqual(trip, original);
+  const next = m.updateTripDetails(trip, details, true);
+  assert.equal(next.days.length, 1);
+  assert.equal(m.budgetSummary(next).spent, 0);
+  assert.deepEqual(trip, original);
+  const empty = m.createTrip(draft, "empty");
+  assert.equal(m.updateTripDetails(empty, details).days.length, 1);
+  assert.deepEqual(m.tripShorteningSummary(empty, { ...draft, end: "2026-11-05" }), { days: 0, activities: 0 });
+});
+
+test("trip detail updates reject invalid fields and retain one-to-thirty-day limits", () => {
+  const trip = m.createTrip(draft, "original");
+  for (const update of [{ name: " " }, { destinationId: "unknown" }, { pace: "unknown" }, { start: "2026-02-30" }, { end: "2026-10-31" }, { end: "2026-12-01" }]) {
+    assert.throws(() => m.updateTripDetails(trip, { ...draft, ...update }, true), /Invalid trip/);
+  }
+  assert.equal(m.updateTripDetails(trip, { ...draft, end: "2026-11-30" }).days.length, 30);
+});
