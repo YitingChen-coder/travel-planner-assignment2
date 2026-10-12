@@ -7,7 +7,7 @@ async function loadTypeScript(file) {
   const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } });
   return import(`data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`);
 }
-const { nextTab, toggleFilter, validateDestination, contrastRatio } = await loadTypeScript('../src/app/design-systems/_components/behavior.ts');
+const { nextTab, toggleFilter, validateDestination, contrastRatio, questProgress } = await loadTypeScript('../src/app/design-systems/_components/behavior.ts');
 const { systems } = await loadTypeScript('../src/app/design-systems/_components/systems.ts');
 
 test('tab keyboard navigation wraps and supports Home and End', () => {
@@ -39,4 +39,16 @@ test('all system semantic swatches meet normal-text contrast against their docum
     assert.ok(contrastRatio(role('border'), role('surface')) >= 3);
   }
   assert.equal(contrastRatio('#000000', '#ffffff'), 21);
+});
+
+test('quest rewards unlock the next experience only after every checkpoint', () => {
+  assert.deepEqual(questProgress([]), { xp: 720, completed: 0, unlocked: false });
+  assert.deepEqual(questProgress(['market']), { xp: 820, completed: 1, unlocked: false });
+  assert.deepEqual(questProgress(['market', 'lantern']), { xp: 900, completed: 2, unlocked: false });
+  assert.deepEqual(questProgress(['market', 'lantern', 'music']), { xp: 1000, completed: 3, unlocked: true });
+});
+test('quest rewards cannot be duplicated or earned from unknown checkpoints', () => {
+  const checkpoints = ['market', 'market', 'unknown'];
+  assert.deepEqual(questProgress(checkpoints), { xp: 820, completed: 1, unlocked: false });
+  assert.deepEqual(checkpoints, ['market', 'market', 'unknown']);
 });

@@ -13,6 +13,15 @@ export function validateDestination(value: string): string | null {
   if (value.trim().length < 2) return 'Use at least two characters.';
   return null;
 }
+export const questCheckpoints = [
+  { id: 'market', label: 'Visit the market', reward: 100 },
+  { id: 'lantern', label: 'Find the lantern lane', reward: 80 },
+  { id: 'music', label: 'Hear a street performance', reward: 100 },
+];
+export function questProgress(completed: string[]) {
+  const earned = questCheckpoints.filter(checkpoint => completed.includes(checkpoint.id));
+  return { xp: 720 + earned.reduce((sum, checkpoint) => sum + checkpoint.reward, 0), completed: earned.length, unlocked: earned.length === questCheckpoints.length };
+}
 export function contrastRatio(first: string, second: string): number {
   function luminance(hex: string) {
     const rgb = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
