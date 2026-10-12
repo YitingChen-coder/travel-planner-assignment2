@@ -331,7 +331,7 @@ export default function Planner() {
                       <p className={styles.tripCardDates}>
                         {dateRangeLabel(trip.start, trip.end)}
                       </p>
-                      <p>
+                      <p className={styles.tripCardMeta}>
                         {trip.days.length} {trip.days.length === 1 ? "day" : "days"} · {trip.pace}
                       </p>
                       <button

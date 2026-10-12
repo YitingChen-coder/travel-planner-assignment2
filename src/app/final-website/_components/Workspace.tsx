@@ -95,7 +95,7 @@ export default function Workspace({
             <button className={styles.secondary} onClick={onNew}>
               Create another trip
             </button>
-            <button className={styles.textButton} onClick={onDelete}>
+            <button className={`${styles.textButton} ${styles.destructiveText}`} onClick={onDelete}>
               Delete this trip
             </button>
           </div>
@@ -211,7 +211,7 @@ export default function Workspace({
                           Edit
                         </button>
                         <button
-                          className={styles.textButton}
+                          className={`${styles.textButton} ${styles.destructiveText}`}
                           onClick={() => setRemoval(activity)}
                           aria-label={`Remove ${activity.title}`}
                         >
@@ -381,7 +381,7 @@ export default function Workspace({
                   </label>
                   {item.custom && (
                     <button
-                      className={styles.iconButton}
+                      className={`${styles.iconButton} ${styles.destructiveText}`}
                       aria-label={`Remove checklist item ${item.label}`}
                       onClick={() =>
                         change(
