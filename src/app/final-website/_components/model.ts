@@ -116,9 +116,11 @@ export function validateTrip(d: TripDraft) {
     (dayCount(d.start, d.end) < 1 || dayCount(d.start, d.end) > 30)
   )
     errors.end = "End date must be on or after the start, within 30 days.";
+  // Keep errors in the same order as the form so the first invalid field
+  // receives focus, including when both pace and budget are invalid.
+  if (!paces.some((p) => p === d.pace)) errors.pace = "Choose a travel pace.";
   const budgetError = validateBudget(d.budget);
   if (budgetError) errors.budget = budgetError;
-  if (!paces.some((p) => p === d.pace)) errors.pace = "Choose a travel pace.";
   return errors;
 }
 export function validateActivity(d: ActivityDraft) {

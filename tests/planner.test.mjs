@@ -252,3 +252,18 @@ test("trip card dates identify same-year, cross-year and single-day journeys", (
   assert.equal(m.dateRangeLabel("2028-02-29", "2028-03-01"), "Feb 29 – Mar 1, 2028");
   assert.equal(m.dateRangeLabel("2026-11-01", "2026-11-01"), "Nov 1, 2026");
 });
+
+test("trip errors follow visible field order so pace precedes budget", () => {
+  const errors = m.validateTrip({ ...draft, pace: "Unknown", budget: "0.001" });
+  assert.deepEqual(Object.keys(errors), ["pace", "budget"]);
+  assert.equal(errors.pace, "Choose a travel pace.");
+  assert.match(errors.budget, /two decimal places/);
+});
+
+test("validation supplies actionable errors for input, select and textarea together", () => {
+  const errors = m.validateActivity({ title: " ", time: "09:00", category: "Unknown", duration: "60", cost: "0", notes: "x".repeat(1001) });
+  assert.deepEqual(Object.keys(errors), ["title", "category", "notes"]);
+  assert.match(errors.title, /activity name/);
+  assert.equal(errors.category, "Choose a category.");
+  assert.equal(errors.notes, "Keep notes within 1,000 characters.");
+});
