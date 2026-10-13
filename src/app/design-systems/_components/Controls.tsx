@@ -7,6 +7,8 @@ import type { Direction } from './systems';
 import { systems } from './systems';
 import { nextTab, toggleFilter, validateDestination } from './behavior';
 import styles from './systems.module.css';
+import { StateGallery } from './StateGallery';
+import { FeedbackScenario } from './FeedbackScenario';
 import { EditorialPatterns, QuestPatterns } from './DirectionPatterns';
 
 export function Controls({ direction }: { direction: Direction }) {
@@ -57,20 +59,20 @@ export function Controls({ direction }: { direction: Direction }) {
       <section className={styles.section} id="actions" aria-labelledby={id('actions-title')}>
         <div className={styles.sectionHeader}><span className={styles.sectionNumber}>04</span><div><p className={styles.eyebrow}>COMPONENTS / ACTIONS</p><h2 id={id('actions-title')}>{direction === 'arcade' ? 'Press start.' : direction === 'editorial' ? 'Make a mark.' : 'A gentle next step.'}</h2></div></div>
         <div className={styles.actionLayout}>
-          <div className={styles.specimen}><h3>Buttons &amp; links</h3><p className={styles.annotation}>Live controls. Actions report their result below.</p><div className={styles.buttonRow}>
+          <div className={styles.specimen}><h3>Buttons &amp; links</h3><p className={styles.annotation}>Component library: <a href="#forms" className={styles.textLink}>Inputs &amp; choices</a> · <a href="#travel" className={styles.textLink}>Cards, lists, badges &amp; modal</a> · <a href="#control-states" className={styles.textLink}>Component states</a></p><p className={styles.annotation}>Live controls. Actions report their result below.</p><div className={styles.buttonRow}>
             <button className={styles.button} onClick={() => { setMessage('A new plan is ready. Add a destination in the form below.'); document.getElementById(id('destination'))?.focus(); }}>{actionLabel}</button>
             <button className={`${styles.button} ${styles.secondary}`} onClick={() => { setDestination(''); setNotes(''); setSeason('Autumn'); setError(null); setMessage('Form reset. Your next journey starts with a blank page.'); }}>Reset form</button>
             <button className={`${styles.button} ${styles.destructive}`} disabled={removed} onClick={() => { setRemoved(true); setMessage('Example trip removed. Use Restore trip to bring it back.'); requestAnimationFrame(() => restoreButton.current?.focus()); }}>Remove trip</button>
           </div><a className={styles.textLink} href={`/${'mood-boards'}/${direction}`}>Explore the approved mood board <span aria-hidden="true">↗</span></a><p className={styles.annotation}>Primary: next step. Secondary: supporting action. Destructive: explicit removal.</p></div>
           <div className={styles.specimen}><h3>Control state atlas</h3><p className={styles.annotation}>Action states use Explore. Selection uses a Nature filter chip; completion uses a separate success badge.</p><div className={styles.stateMatrix}>
-            {['Default', 'Hover', 'Focus', 'Pressed', 'Selected', 'Disabled'].map(state => <div key={state}><span className={styles.stateLabel}>{state}</span><span className={`${styles.button} ${styles.stateSample}`} data-state={state.toLowerCase()}>{state === 'Selected' ? 'Nature ✓' : 'Explore'}</span></div>)}
+            {['Rest', 'Hover', 'Focus', 'Pressed', 'Selected', 'Disabled'].map(state => <div key={state}><span className={styles.stateLabel}>{state}</span><span className={`${state === 'Selected' ? styles.chip : styles.button} ${styles.stateSample}`} data-state={state.toLowerCase()}>{state === 'Selected' ? 'Nature ✓' : 'Explore'}</span></div>)}
           </div></div>
         </div>
         <p className={styles.liveMessage} role="status" aria-live="polite">{message || 'Try an action, or save a destination below. Changes last for this visit.'}</p>
       </section>
 
       <section className={styles.section} id="forms" aria-labelledby={id('forms-title')}>
-        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>05</span><div><p className={styles.eyebrow}>COMPONENTS / INPUT &amp; CHOICE</p><h2 id={id('forms-title')}>{direction === 'arcade' ? 'Configure your run.' : direction === 'editorial' ? 'The details matter.' : 'Make room for your plans.'}</h2></div></div>
+        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>04B</span><div><p className={styles.eyebrow}>COMPONENTS / INPUT &amp; CHOICE</p><h2 id={id('forms-title')}>{direction === 'arcade' ? 'Configure your run.' : direction === 'editorial' ? 'The details matter.' : 'Make room for your plans.'}</h2></div></div>
         <div className={styles.formLayout}>
           <form className={styles.specimen} onSubmit={submit} noValidate>
             <h3>{direction === 'arcade' ? 'Quest briefing' : direction === 'editorial' ? 'Notebook entry' : 'Trip notes'}</h3><p className={styles.annotation}>A working form with validation and a local confirmation.</p>
@@ -94,8 +96,9 @@ export function Controls({ direction }: { direction: Direction }) {
         </div>
       </section>
 
+      <StateGallery direction={direction} />
       <section className={styles.section} id="travel" aria-labelledby={id('travel-title')}>
-        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>06</span><div><p className={styles.eyebrow}>COMPONENTS / TRAVEL PATTERNS</p><h2 id={id('travel-title')}>{direction === 'arcade' ? 'Your quest inventory.' : direction === 'editorial' ? 'Stories, indexed.' : 'A day worth keeping.'}</h2></div></div>
+        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>04C</span><div><p className={styles.eyebrow}>COMPONENTS / TRAVEL PATTERNS</p><h2 id={id('travel-title')}>{direction === 'arcade' ? 'Your quest inventory.' : direction === 'editorial' ? 'Stories, indexed.' : 'A day worth keeping.'}</h2></div></div>
         <div className={styles.travelLayout}>
           {removed ? <div className={styles.specimen}><p className={styles.eyebrow}>REMOVED / UNDO AVAILABLE</p><h3>Example trip removed</h3><p>The destination card is no longer in this collection. Restore it to keep the original details.</p><button ref={restoreButton} className={styles.button} onClick={() => { setRemoved(false); setMessage('Example trip restored with its original details.'); requestAnimationFrame(() => openButton.current?.focus()); }}>Restore trip</button></div> : <div className={styles.destinationCard}>
             <div className={styles.cardImage}><Image src={system.image} alt={system.imageAlt} fill sizes="(max-width: 640px) 100vw, 45vw" /><span className={styles.imageLabel}>{direction === 'arcade' ? 'WORLD 03 / AVAILABLE' : direction === 'editorial' ? 'DESTINATION ESSAY / 08' : 'A PLACE TO PAUSE'}</span></div>
@@ -118,15 +121,22 @@ export function Controls({ direction }: { direction: Direction }) {
       </section>
 
       <section className={styles.section} id="feedback" aria-labelledby={id('feedback-title')}>
-        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>07</span><div><p className={styles.eyebrow}>SYSTEM FEEDBACK</p><h2 id={id('feedback-title')}>{direction === 'arcade' ? 'Every state, unlocked.' : direction === 'editorial' ? 'Clear signals.' : 'Here when you need it.'}</h2></div></div>
+        <div className={styles.sectionHeader}><span className={styles.sectionNumber}>06</span><div><p className={styles.eyebrow}>SYSTEM FEEDBACK</p><h2 id={id('feedback-title')}>{direction === 'arcade' ? 'Every state, unlocked.' : direction === 'editorial' ? 'Clear signals.' : 'Here when you need it.'}</h2></div></div>
         <div className={styles.feedbackGrid}>
           <div className={styles.feedback}><span className={styles.stateLabel}>Empty</span><h3>A blank itinerary</h3><p>No stops yet. Start with one place you’d like to see.</p><button className={`${styles.button} ${styles.secondary}`} onClick={() => document.getElementById(id('destination'))?.focus()}>Add a destination</button></div>
           <div className={styles.feedback}><span className={styles.stateLabel}>Loading specimen</span><div className={styles.loadingPreview} aria-busy={loading}>{loading ? <><h3>Preparing a place preview…</h3><div className={styles.skeleton} aria-hidden="true" /><div className={`${styles.skeleton} ${styles.skeletonShort}`} aria-hidden="true" /></> : <><h3>{system.destination}</h3><p>Place preview · 3 days / 2 nights</p></>}</div><button className={`${styles.button} ${styles.secondary}`} disabled={loading} onClick={() => { setLoading(true); setLoaded(false); loadingTimer.current = setTimeout(() => { setLoading(false); setLoaded(true); }, 700); }}>{loading ? 'Preparing preview…' : 'Preview loading'}</button><p role="status">{loaded ? 'Preview ready. No network request was made.' : 'Local loading simulation: reserve space and disable the pending action.'}</p></div>
           <div className={`${styles.feedback} ${styles.errorFeedback}`}><span className={styles.stateLabel}>Error</span><h3>That place needs a name</h3><p>Error: enter a destination before saving your plan.</p><button className={`${styles.button} ${styles.secondary}`} onClick={() => document.getElementById(id('destination'))?.focus()}>Review destination</button></div>
           <div className={`${styles.feedback} ${styles.successFeedback}`}><span className={styles.stateLabel}>Success</span><h3>Your plan is saved</h3><p>Success: all three days are ready to explore. You can still change your mind.</p><span className={`${styles.badge} ${styles.successBadge}`}>Saved for this visit</span></div>
-        </div><p className={styles.annotation}>Feedback always pairs color with a heading and explanation. Live form confirmations use a polite status announcement.</p>
+        </div><FeedbackScenario direction={direction} /><p className={styles.annotation}>Feedback always pairs color with a heading and explanation. Live form confirmations use a polite status announcement.</p>
       </section>
-      <dialog ref={dialog} className={styles.dialog} aria-labelledby={id('modal-title')} aria-describedby={id('modal-description')} onClick={event => {
+      <dialog ref={dialog} onKeyDown={event => {
+        if (event.key !== 'Tab') return;
+        const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]'));
+        const first = controls[0]; const last = controls[controls.length - 1];
+        if (!first) { event.preventDefault(); return; }
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }} className={styles.dialog} aria-labelledby={id('modal-title')} aria-describedby={id('modal-description')} onClick={event => {
           if (event.target !== event.currentTarget) return;
           const bounds = event.currentTarget.getBoundingClientRect();
           if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.current?.close();

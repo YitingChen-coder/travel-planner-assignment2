@@ -52,3 +52,16 @@ test('quest rewards cannot be duplicated or earned from unknown checkpoints', ()
   assert.deepEqual(questProgress(checkpoints), { xp: 820, completed: 1, unlocked: false });
   assert.deepEqual(checkpoints, ['market', 'market', 'unknown']);
 });
+
+test('type specimens identify real content and preserve explicit roles and metrics', () => {
+  for (const [direction, system] of Object.entries(systems)) {
+    assert.deepEqual(system.typography.map(t => t.role), ['Display', 'Heading', 'Body', 'Label']);
+    const sources = readFileSync(new URL('../src/app/design-systems/_components/Controls.tsx', import.meta.url),'utf8') + readFileSync(new URL('../src/app/design-systems/_components/Showcase.tsx', import.meta.url),'utf8') + readFileSync(new URL('../src/app/final-website/_components/Planner.tsx', import.meta.url),'utf8');
+    for (const token of system.typography) {
+      assert.ok(token.size >= 12 && token.weight >= 400);
+      assert.match(token.source, /^\/(final-website|design-systems\/)/);
+      // Hero markup can split phrases across elements; other real copy is contiguous.
+      if (token.role !== 'Display') assert.ok(sources.replace(/\s+/g,' ').includes(token.sample), `${direction} ${token.role}: actual content`);
+    }
+  }
+});

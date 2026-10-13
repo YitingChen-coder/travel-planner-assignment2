@@ -460,3 +460,42 @@
 .directionPatterns progress::-moz-progress-bar { background: var(--accent); }
 
 .field :is(input, select, textarea)[aria-invalid='true']:is(:hover, :focus) { border-color: var(--error); }
+
+/* Component-specific references share treatments with the live controls. */
+.controlGallery { display: grid; gap: 24px; margin-top: 24px; }
+.controlExamples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 20px; }
+.controlExample { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius); }
+.previewControl { min-width: 0; }
+.previewControl .field { margin-top: 0; }
+.previewControl .tabs { flex-wrap: wrap; }
+.previewRadio { border: 0; padding: 0; margin: 0; min-width: 0; }
+.previewRadio .check { margin: 8px 0; }
+.controlExample[data-preview='hover'] :is(.button, .chip, .switch), .check:has(input:not(:disabled)):hover { box-shadow: 0 0 0 2px var(--border); }
+.controlExample[data-preview='pressed'] :is(.button, .chip, .switch), .check:has(input:not(:disabled)):active { box-shadow: inset 0 2px 4px rgb(0 0 0 / 30%); transform: translateY(1px); }
+.controlExample[data-preview='focus'] :is(.button, .textLink, .field input, .field select, .field textarea, .switch, .chip, .tabs button[aria-selected='true'], .check:first-of-type input) { outline: 3px solid var(--focus); outline-offset: 4px; }
+.controlExample[data-preview='hover'] .field :is(input, select, textarea) { border-color: var(--accent); }
+.controlExample[data-preview='hover'] .textLink { text-decoration-thickness: 3px; }
+.controlExample[data-preview='pressed'] .textLink { text-decoration-thickness: 4px; }
+.controlExample[data-preview='hover'] .check { box-shadow: 0 0 0 2px var(--border); }
+.controlExample[data-preview='pressed'] .check { box-shadow: inset 0 2px 4px rgb(0 0 0 / 30%); }
+.controlExample[data-preview='hover'] .tabs button[aria-selected='true'] { background: var(--background); }
+.controlExample[data-preview='pressed'] .tabs button[aria-selected='true'] { box-shadow: inset 0 -3px 0 var(--accent); }
+.textLink[aria-disabled='true'] { color: var(--muted); text-decoration: none; cursor: not-allowed; }
+.tabs button:disabled, .chip:disabled { color: var(--muted); border: 1px dashed var(--border); background: var(--surface); box-shadow: none; transform: none; cursor: not-allowed; }
+.scenarioResult { min-height: 160px; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius); }
+.scenarioResult[data-result='error'] { border-left: 4px solid var(--error); }
+.scenarioResult[data-result='success'] { border-left: 4px solid var(--success); }
+.scenarioResult h4 { font-size: 20px; margin-bottom: 12px; }
+.arcade .controlExample[data-preview='pressed'] .button { transform: translate(3px,3px); box-shadow: 1px 1px 0 #35e4e8; }
+.editorial .controlExample[data-preview='pressed'] .button { transform: translateY(2px); box-shadow: inset 0 3px 0 #a2493c; }
+@media (max-width: 800px) { .controlExamples { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .controlExamples { grid-template-columns: minmax(0, 1fr); } }
+.tabs button[aria-selected='true']:hover:not(:disabled), .controlExample[data-preview='hover'] .tabs button[aria-selected='true'] { background: var(--accent); color: var(--accent-fg); box-shadow: inset 0 -3px 0 var(--border); }
+.controlExample[data-preview='hover'] .button { box-shadow: 0 4px 12px rgb(41 55 47 / 20%); transform: translateY(-1px); }
+/* Preserve each direction's action feedback in the reference specimens. */
+.arcade .controlExample[data-preview='hover'] .button { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 #ffd84d; }
+.editorial .controlExample[data-preview='hover'] .button { transform: none; box-shadow: inset 0 -4px 0 #a2493c; }
+
+.page .tabs button:disabled, .page .chip:disabled { color: var(--muted); background: var(--surface); border: 1px dashed var(--border); box-shadow: none; transform: none; }
+
+.page .button:disabled { box-shadow: none; transform: none; background: var(--surface); color: var(--muted); border-color: var(--border); border-style: dashed; }

@@ -1,6 +1,6 @@
 export type Direction = 'calm' | 'arcade' | 'editorial';
 export type ColorToken = { key: string; role: string; value: string; foreground: string; use: string };
-export type TypeToken = { role: string; family: string; size: number; weight: number; lineHeight: number; sample: string };
+export type TypeToken = { role: string; family: string; size: number; weight: number; lineHeight: number; sample: string; source: string };
 export type System = {
   name: string; subtitle: string; intro: string; number: string; image: string; imageAlt: string;
   colors: ColorToken[]; typography: TypeToken[]; spacing: number[]; radii: number[];
@@ -24,10 +24,10 @@ export const systems: Record<Direction, System> = {
       { key: 'error', role: 'Error', value: '#8F3C30', foreground: '#FFFFFF', use: 'Deep terracotta for validation and destructive actions.' },
     ],
     typography: [
-      { role: 'Display', family: 'Georgia, serif', size: 76, weight: 400, lineHeight: 1.05, sample: 'Take the long way.' },
-      { role: 'Heading', family: 'Georgia, serif', size: 42, weight: 400, lineHeight: 1.2, sample: 'A place to pause' },
-      { role: 'Body', family: 'Arial, sans-serif', size: 16, weight: 400, lineHeight: 1.65, sample: 'Leave an afternoon open. The best part of a trip often finds you.' },
-      { role: 'Label', family: 'Arial, sans-serif', size: 12, weight: 700, lineHeight: 1.5, sample: 'DAY THREE / NEAR THE WATER' },
+      { role: 'Display', family: 'Georgia, serif', size: 76, weight: 400, lineHeight: 1.05, sample: 'Make room for the journey.', source: '/final-website · hero heading' },
+      { role: 'Heading', family: 'Georgia, serif', size: 42, weight: 400, lineHeight: 1.2, sample: 'A day worth keeping.', source: '/design-systems/calm#travel · section heading' },
+      { role: 'Body', family: 'Arial, sans-serif', size: 16, weight: 400, lineHeight: 1.65, sample: 'Less rushing. More being there. Discover beautiful places and shape a few thoughtful days, at your own pace.', source: '/final-website · hero description' },
+      { role: 'Label', family: 'Arial, sans-serif', size: 12, weight: 700, lineHeight: 1.5, sample: 'FOR THE PLACES THAT STAY WITH YOU', source: '/final-website · hero overline' },
     ], spacing: [4, 8, 12, 16, 20, 24, 28, 32, 48, 64], radii: [0, 8, 16, 24],
     geometry: '12-column desktop grid, 24px gutters, 1280px maximum content. At 640px and below, use one column and 20px side margins. Keep 24–48px between quiet groups.',
     border: '1px solid #697161 for controls; 1px #D6D9CC for decorative separation.',
@@ -50,10 +50,10 @@ export const systems: Record<Direction, System> = {
       { key: 'error', role: 'Error', value: '#FF5D67', foreground: '#171531', use: 'Joystick coral marks errors and destructive actions.' },
     ],
     typography: [
-      { role: 'Display', family: 'Arial Black, Arial, sans-serif', size: 72, weight: 900, lineHeight: .95, sample: 'GO. PLAY. EXPLORE.' },
-      { role: 'Heading', family: 'Arial, sans-serif', size: 32, weight: 900, lineHeight: 1.1, sample: 'QUEST ACCEPTED' },
-      { role: 'Body', family: 'Arial, sans-serif', size: 16, weight: 400, lineHeight: 1.6, sample: 'Take the side quest. Find a new street. Collect a story worth keeping.' },
-      { role: 'Label', family: 'Consolas, monospace', size: 12, weight: 700, lineHeight: 1.5, sample: 'PLAYER 01 // WORLD UNLOCKED' },
+      { role: 'Display', family: 'Arial Black, Arial, sans-serif', size: 72, weight: 900, lineHeight: .95, sample: 'PLAY THE WORLD.', source: '/design-systems/arcade · hero heading' },
+      { role: 'Heading', family: 'Arial, sans-serif', size: 32, weight: 900, lineHeight: 1.1, sample: 'Your quest inventory.', source: '/design-systems/arcade#travel · section heading' },
+      { role: 'Body', family: 'Arial, sans-serif', size: 16, weight: 400, lineHeight: 1.6, sample: 'Three neighborhoods. Four street-food stops. One city full of side quests.', source: '/design-systems/arcade#travel · quest card' },
+      { role: 'Label', family: 'Consolas, monospace', size: 12, weight: 700, lineHeight: 1.5, sample: 'WORLD SELECT / TOKYO', source: '/design-systems/arcade · photo label' },
     ], spacing: [4, 8, 12, 16, 24, 32, 48], radii: [0, 2, 4],
     geometry: '12-column desktop grid, 20px gutters, 1280px maximum content. Use 2px frames and compact HUD groups. Below 640px, stack panels with 20px page margins.',
     border: '2px solid #9287AF; selection uses purple with a white boundary; cyan identifies focus and completion.', shadow: '4px 4px 0 #35E4E8; pressed controls move 3px and reduce the shadow.',
@@ -75,10 +75,10 @@ export const systems: Record<Direction, System> = {
       { key: 'error', role: 'Error', value: '#A2493C', foreground: '#FFFFFF', use: 'Brick red marks validation and destructive intent.' },
     ],
     typography: [
-      { role: 'Display', family: 'Arial, sans-serif', size: 96, weight: 900, lineHeight: .9, sample: 'LOOK CLOSER.' },
-      { role: 'Heading', family: 'Arial, sans-serif', size: 40, weight: 800, lineHeight: 1, sample: 'Outside the frame' },
-      { role: 'Body', family: 'Georgia, serif', size: 18, weight: 400, lineHeight: 1.65, sample: 'A story begins where the itinerary ends. Follow the details, then turn the page.' },
-      { role: 'Label', family: 'Arial, sans-serif', size: 12, weight: 700, lineHeight: 1.5, sample: 'FIELD REPORT / No. 03' },
+      { role: 'Display', family: 'Arial, sans-serif', size: 96, weight: 900, lineHeight: .9, sample: 'THE ART OF ELSEWHERE.', source: '/design-systems/editorial · hero heading' },
+      { role: 'Heading', family: 'Arial, sans-serif', size: 40, weight: 800, lineHeight: 1, sample: 'Stories, indexed.', source: '/design-systems/editorial#travel · section heading' },
+      { role: 'Body', family: 'Georgia, serif', size: 18, weight: 400, lineHeight: 1.65, sample: 'A harbor in three chapters: working boats, painted houses, and the climb above the quay.', source: '/design-systems/editorial#travel · destination card' },
+      { role: 'Label', family: 'Arial, sans-serif', size: 12, weight: 700, lineHeight: 1.5, sample: 'INTERFACE EDITION / No. 03', source: '/design-systems/editorial · issue label' },
     ], spacing: [4, 8, 16, 24, 32, 48, 64, 96], radii: [0],
     geometry: '12-column print grid, 24px gutters, 1320px maximum content. Align headlines and index rows to the same edge. Below 640px, use a single column with 20px margins. Essays use Georgia 18px; interface copy uses Arial 16px, labels 12–14px.',
     border: '1px solid #606060 for controls; 4px solid #111111 for graphic section rules.', shadow: 'None. Use tonal contrast and graphic rules for hierarchy.',

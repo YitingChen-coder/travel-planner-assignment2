@@ -18,7 +18,7 @@ try {
       page.on('pageerror', e => errors.push(e.message));
       page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
       await page.goto(`${base}/design-systems/${direction}`);
-      const toggle = page.getByRole('switch');
+      const toggle = page.locator('#forms').getByRole('switch');
       await toggle.scrollIntoViewIfNeeded(); await page.mouse.move(0, 0);
       const rest = await appearance(toggle); await toggle.hover();
       const hover = await appearance(toggle);
@@ -61,7 +61,7 @@ try {
       if (direction === 'arcade') {
         const gate = page.getByRole('button', { name: 'Enter bonus experience', exact: true });
         assert.equal(await gate.isDisabled(), true);
-        for (const name of ['Visit the market', 'Find the lantern lane', 'Hear a street performance']) await page.getByLabel(name).check();
+        for (const name of ['Visit the market', 'Find the lantern lane', 'Hear a street performance']) await page.locator('#travel').getByLabel(name).check();
         assert.equal(await page.locator('#arcade-quest-xp').getAttribute('value'), '1000');
         assert.equal(await gate.isEnabled(), true);
         await gate.click(); assert.equal(await page.getByText('Bonus experience entered', { exact: true }).isVisible(), true);
